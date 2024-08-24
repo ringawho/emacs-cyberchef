@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "cyberchef": "^10.19.2",
+    "terser": "^5.31.6",
+    "ws": "^8.18.0"
+  },
+  "scripts": {
+    "init": "npm install --ignore-scripts && npm run fix",
+    "fix": "npx grunt exec:fixCryptoApiImports && npx grunt exec:fixSnackbarMarkup && npx grunt exec:fixJimpModule"
+  },
+  "devDependencies": {
+    "grunt": "^1.6.1",
+    "grunt-exec": "^3.0.0"
+  }
+}
