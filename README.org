@@ -4,6 +4,17 @@
 This package brings the powerful capabilities of CyberChef into Emacs. You can store frequently-used CyberChef recipes in configuration file and apply them directly within the emacs for quick encryption and decryption of data. This eliminates the need to switch to a browser, streamlining workflows for handling sensitive information.
 
 * Installation
+** Straight
+#+begin_src emacs-lisp
+  (use-package cyberchef
+    :straight (:type git :host github
+                     :repo "ringawho/emacs-cyberchef"
+                     :files (:defaults "*.mjs" "*.js" "*.json")
+                     :pre-build (("npm" "run" "init")))
+    :config (cyberchef-start))
+#+end_src
+
+** Manual
 1. Clone the repo and install dependencies.
    #+begin_src shell
      git clone https://github.com/ringawho/emacs-cyberchef.git
@@ -19,7 +30,7 @@ This package brings the powerful capabilities of CyberChef into Emacs. You can s
 
 * Recipe Configuration
 #+begin_quote
-Default configuration file is ~~/.emacs.d/cyberchef.json~.
+Default configuration file is ~/.emacs.d/cyberchef.json.
 #+end_quote
 
 The configuration is a JSON array, where each element is an object. The objects have the following keys:
