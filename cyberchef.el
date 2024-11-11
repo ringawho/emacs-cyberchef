@@ -91,7 +91,7 @@
         (switch-to-buffer-other-window buf)))))
 
 (defun cyberchef--ws-on-open (ws)
-  (set-process-query-on-exit-flag (websocket-server-conn ws) nil)
+  (set-process-query-on-exit-flag (websocket-conn ws) nil)
   (setq cyberchef-ws-conn ws))
 
 (defun cyberchef--ws-on-close (_ws)
