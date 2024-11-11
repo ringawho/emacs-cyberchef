@@ -67,6 +67,7 @@
 (defvar cyberchef-js-process nil)
 (defvar cyberchef-ws-server nil)
 (defvar cyberchef-ws-conn nil)
+(defvar cyberchef-exec-timer nil)
 
 (defun cyberchef--ws-on-message (_ws frame)
   (let* ((parsed (json-read-from-string (websocket-frame-text frame)))
@@ -74,6 +75,10 @@
          (msg (alist-get 'message parsed))
          (postproc (alist-get 'postproc parsed))
          buf)
+    (when cyberchef-exec-timer
+      (cancel-timer cyberchef-exec-timer)
+      (setq cyberchef-exec-timer nil)
+      (message "[Cyberchef] Done."))
     (if (< status 0)
         (message msg)
       (when postproc
@@ -86,6 +91,7 @@
         (switch-to-buffer-other-window buf)))))
 
 (defun cyberchef--ws-on-open (ws)
+  (set-process-query-on-exit-flag (websocket-server-conn ws) nil)
   (setq cyberchef-ws-conn ws))
 
 (defun cyberchef--ws-on-close (_ws)
@@ -107,7 +113,8 @@
                          cyberchef-proc-and-buf-name
                          "node"
                          cyberchef-js-file
-                         (number-to-string port)))))
+                         (number-to-string port)))
+    (set-process-query-on-exit-flag cyberchef-js-process nil)))
 
 ;;;###autoload
 (defun cyberchef-close (&optional restart)
@@ -126,6 +133,8 @@
     (ignore-errors
       (websocket-server-close cyberchef-ws-server))
     (setq cyberchef-ws-server nil)))
+
+(add-hook 'kill-emacs-hook #'cyberchef-close)
 
 ;;;###autoload
 (defun cyberchef-restart ()
@@ -158,6 +167,7 @@
              (text-preproc (alist-get 'text selected))
              (args-preproc (alist-get 'args selected))
              (postproc (alist-get 'res selected))
+             (hint (alist-get 'hint selected))
              (bake (json-encode (alist-get 'bake selected))))
         (when text
           (when args-preproc
@@ -170,6 +180,11 @@
           (when text-preproc
             (setq text (eval (car (read-from-string text-preproc))
                              (list (cons 'text text)))))
+          (when hint
+            (if cyberchef-exec-timer
+                (cancel-timer cyberchef-exec-timer)
+              (setq cyberchef-exec-timer
+                    (run-at-time t 1 (lambda () (message "[Cyberchef] Executing ..."))))))
           (websocket-send-text cyberchef-ws-conn
                                (json-encode (list :text text
                                                   :bake bake
